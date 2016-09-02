@@ -120,10 +120,8 @@ class Driver {
       // Queue up a 'reset', to ensure the next user gets a clean
       // session to work with.
       conn.reset();
-      conn.sync();
-
-      // Return connection to the pool
-      conn._release();
+      // Return connection to the pool when sync is done
+      conn.sync(conn._release);
 
       // Call user callback
       if(cb) { cb(); }

@@ -275,14 +275,14 @@ class NodeChannel {
    * Write the passed in buffer to connection
    * @param {NodeBuffer} buffer - Buffer to write
    */
-  write ( buffer ) {
+  write ( buffer, cb = () => null ) {
     // If there is a pending queue, push this on that queue. This means
     // we are not yet connected, so we queue things locally.
     if( this._pending !== null ) {
       this._pending.push( buffer );
     } else if( buffer instanceof NodeBuffer ) {
       // console.log( "[Conn#"+this.id+"] SEND: ", buffer.toString() );
-      this._conn.write( buffer._buffer );
+      this._conn.write( buffer._buffer , cb );
     } else {
       throw newError( "Don't know how to write: " + buffer );
     }

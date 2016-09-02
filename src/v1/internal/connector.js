@@ -397,8 +397,8 @@ class Connection {
    * Synchronize - flush all queued outgoing messages and route their responses
    * to their respective handlers.
    */
-  sync() {
-    this._chunker.flush();
+  sync(cb = () => null) {
+    this._chunker.flush(cb);
   }
 
   /** Check if this connection is in working condition */

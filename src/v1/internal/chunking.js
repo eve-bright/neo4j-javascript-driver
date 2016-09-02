@@ -69,7 +69,7 @@ class Chunker extends buf.BaseBuffer {
     return this;
   }
 
-  flush() {
+  flush(cb = () => null) {
     if (this._buffer.position > 0) {
       this._closeChunkIfOpen();
 
@@ -77,7 +77,7 @@ class Chunker extends buf.BaseBuffer {
       let out = this._buffer;
       this._buffer = null;
 
-      this._ch.write(out.getSlice(0, out.position));
+      this._ch.write(out.getSlice(0, out.position), cb);
 
       // Alloc a new output buffer. We assume we're using NodeJS's buffer pooling under the hood here!
       this._buffer = buf.alloc(this._bufferSize);

@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 import {debug} from "./log";
 import {HeapBuffer} from "./buf";
 import {newError} from './../error';
@@ -81,7 +81,7 @@ class WebSocketChannel {
       if( self.onmessage ) {
         var b = new HeapBuffer( event.data );
         self.onmessage( b );
-      } 
+      }
     };
 
     this._ws.onerror = this._handleConnectionError;
@@ -103,7 +103,7 @@ class WebSocketChannel {
       }
     }
   }
-  
+
   isEncrypted() {
     return this._encrypted;
   }
@@ -112,12 +112,18 @@ class WebSocketChannel {
    * Write the passed in buffer to connection
    * @param {HeapBuffer} buffer - Buffer to write
    */
-  write ( buffer ) {
+  write ( buffer, cb = () => null ) {
     // If there is a pending queue, push this on that queue. This means
     // we are not yet connected, so we queue things locally.
     if( this._pending !== null ) {
       this._pending.push( buffer );
     } else if( buffer instanceof HeapBuffer ) {
+      const tmp = this._ws.onmessage;
+      this._ws.onmessage = (event) => {
+        cb();
+        tmp(event);
+        this._ws.onmessage = tmp;
+      }
       this._ws.send( buffer._buffer );
     } else {
       throw newError( "Don't know how to send buffer: " + buffer );
