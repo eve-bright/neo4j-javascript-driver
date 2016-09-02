@@ -75,4 +75,26 @@ describe('driver', function() {
     // When
     driver.session();
   });
+
+  describe('using same driver for multiple sessions', function() {
+    var driverGlobal, promiseForBadCypherQuery,  sessionForBadCypherQuery
+    beforeEach(function(done) {
+      driverGlobal = neo4j.driver("bolt://localhost", neo4j.auth.basic("neo4j", "neo4j"));
+      sessionForBadCypherQuery = driverGlobal.session();
+      promiseForBadCypherQuery = sessionForBadCypherQuery.run('call sdaddasds');
+      promiseForBadCypherQuery.then(function () {}, function (r) {
+        sessionForBadCypherQuery.close();
+        done();
+      });
+    });
+
+    it('should be able to run subsequent successful query in a new session after failed cypher query', function(done) {
+      // Given
+      var sessionForGoodCypherQuery = driverGlobal.session();
+      var promiseForGoodCypherQuery = sessionForGoodCypherQuery.run('match (n) return n');
+      promiseForGoodCypherQuery.then(
+          function (r) { done();},
+          function (e) {done.fail('Expected second query to be successful but got error: "' + e + '"');});
+    })
+  });
 });
